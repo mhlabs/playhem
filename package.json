@@ -1,0 +1,49 @@
+{
+  "name": "playhem",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "jest": {
+    "collectCoverage": false,
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ]
+  },
+  "dependencies": {
+    "@mhlabs/structured-logging": "^2.0.2",
+    "@slack/web-api": "^5.11.0",
+    "axios": "^0.20.0",
+    "dynamodb-toolbox": "^0.2.0-beta.1",
+    "form-data": "^3.0.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.744.0"
+  },
+  "scripts": {
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "coverage-percentage": "jest --coverage --coverageReporters=text-summary 2>/dev/null | grep 'Functions    :' | cut -d ':' -f 2 | cut -d '%' -f 1 | xargs | tr -d '\n'",
+    "eslint": "eslint",
+    "start": "nodemon ./src/apiLocal.js",
+    "debug": "node --inspect-brk=9229 ./src/apiLocal.js"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/*.json"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

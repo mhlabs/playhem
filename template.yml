@@ -1,0 +1,241 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform:
+  - 'AWS::Serverless-2016-10-31'
+Parameters:
+  CompanyName:
+    Type: String
+  SlackToken:
+    Type: String
+Description: Stack for Playhem
+Globals:
+  Function:
+    Environment:
+      Variables:
+        Table: !Ref Table
+    Runtime: nodejs12.x
+Resources:
+  Table:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: ReverseLookupGSI
+          KeySchema:
+            - AttributeName: SK
+              KeyType: HASH
+            - AttributeName: PK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+  WebhookConsumer:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: .
+      Handler: src/webhook/WebhookConsumer.handler
+      MemorySize: 256
+      Timeout: 5
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: playhem
+      Environment:
+        Variables:
+          EventBusName: !Ref EventBus
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            Method: POST
+            Path: /webhook
+  AuthCallback:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: .
+      Handler: src/auth/AuthCallback.handler
+      MemorySize: 256
+      Timeout: 5
+      Environment:
+        Variables:
+          TokenUrl: !Sub >-
+            https://${CompanyName}-playhem.auth.${AWS::Region}.amazoncognito.com/oauth2/token
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            Method: ANY
+            Path: /oauth2/callback
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+  AuthFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: .
+      Handler: src/auth/AuthFunction.handler
+      MemorySize: 256
+      Timeout: 5
+      Policies: []
+      Environment:
+        Variables:
+          SlackToken: !Ref SlackToken
+          UserPoolDomainUrl: !Sub 'https://${CompanyName}-playhem.auth.${AWS::Region}.amazoncognito.com'
+          WebHookUrl: !Sub >-
+            https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/webhook
+          ClientId: !Ref UserPoolClient
+          RedirectUri: !Sub >-
+            https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/oauth2/callback
+  AuthRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      EventBusName: playhem
+      EventPattern:
+        source:
+          - playhem
+        detail-type:
+          - login
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt AuthFunction.Arn
+          Id: AuthTargetId
+          InputTransformer:
+            InputPathsMap:
+              Team: $.detail.team_domain
+              UserId: $.detail.user_id
+              UserName: $.detail.user_name
+              Channel: $.detail.channel_name
+              ResponseUrl: $.detail.response_url
+            InputTemplate: >-
+              {"Team": <Team>, "UserId": <UserId>, "UserName": <UserName>,
+              "Channel": <Channel> , "ResponseUrl": <ResponseUrl> }
+  PermissionForAuthEventToInvokeLambda:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref AuthFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt AuthRule.Arn
+  InitiateGame:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: .
+      Handler: src/game/InitiateGame.handler
+      MemorySize: 256
+      Timeout: 5
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+      Environment:
+        Variables:
+          SlackToken: !Ref SlackToken
+          UserPoolDomainUrl: !Sub 'https://${CompanyName}-playhem.auth.${AWS::Region}.amazoncognito.com'
+          WebHookUrl: !Sub >-
+            https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/webhook
+          ClientId: !Ref UserPoolClient
+          RedirectUri: !Sub >-
+            https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/oauth2/callback
+  InitiateGameRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      EventBusName: playhem
+      EventPattern:
+        source:
+          - playhem
+        detail-type:
+          - submit
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt InitiateGame.Arn
+          Id: AuthTargetId
+          InputTransformer:
+            InputPathsMap:
+              Team: $.detail.team_domain
+              UserId: $.detail.user_id
+              UserName: $.detail.user_name
+              Channel: $.detail.channel_name
+              ResponseUrl: $.detail.response_url
+            InputTemplate: >-
+              {"Team": <Team>, "UserId": <UserId>, "UserName": <UserName>,
+              "Channel": <Channel> , "ResponseUrl": <ResponseUrl> }
+  PermissionForInitiateGameEventToInvokeLambda:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref InitiateGame
+      Action: 'lambda:InvokeFunction'
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt InitiateGameRule.Arn
+  EventBus:
+    Type: 'AWS::Events::EventBus'
+    Properties:
+      Name: playhem
+  SchemaDiscoverer:
+    Type: 'AWS::EventSchemas::Discoverer'
+    Properties:
+      SourceArn: !GetAtt EventBus.Arn
+  UserPool:
+    Type: 'AWS::Cognito::UserPool'
+    Properties:
+      UserPoolName: !Sub '${AWS::StackName}-userpool'
+      DeviceConfiguration:
+        DeviceOnlyRememberedOnUserPrompt: false
+        ChallengeRequiredOnNewDevice: false
+      LambdaConfig:
+        PreSignUp: !GetAtt AutoApprove.Arn
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 7
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+  UserPoolClient:
+    Type: 'AWS::Cognito::UserPoolClient'
+    Properties:
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes:
+        - openid
+      SupportedIdentityProviders:
+        - COGNITO
+      UserPoolId: !Ref UserPool
+      CallbackURLs:
+        - !Sub >-
+          https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/oauth2/callback
+  UserPoolDomain:
+    Type: 'AWS::Cognito::UserPoolDomain'
+    Properties:
+      UserPoolId: !Ref UserPool
+      Domain: !Sub '${CompanyName}-playhem'
+  AutoApprove:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: src/auth/AutoApprove.handler
+      CodeUri: .
+      MemorySize: 256
+      Timeout: 5
+      Role: null
+      Policies:
+        - AWSLambdaFullAccess
+        - AWSXrayWriteOnlyAccess
+  UserPoolPreAuthLambdaInvokePermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:invokeFunction'
+      Principal: cognito-idp.amazonaws.com
+      FunctionName: !Ref AutoApprove
+      SourceArn: !Sub >-
+        arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPool}
+Outputs:
+  HttpApiUrl:
+    Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/'
+  UserPoolDomain:
+    Value: !Sub 'https://${CompanyName}-playhem.auth.${AWS::Region}.amazoncognito.com'
