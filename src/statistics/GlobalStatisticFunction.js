@@ -2,12 +2,6 @@ const { GlobalStatistic } = require('../db/entities/GlobalStatistic');
 const { Game } = require('../db/entities/game');
 
 function activePlayers(players, maxDays = 30) {
-  if (!players) {
-    throw Error(
-      'players parameter was falsy when calling activePlayers(players, maxDays)'
-    );
-  }
-
   const today = new Date();
   const activePlayers = [];
   for (const player of players) {
