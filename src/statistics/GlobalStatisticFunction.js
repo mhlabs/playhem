@@ -10,8 +10,8 @@ function activePlayers(players, maxDays = 30) {
 
   const today = new Date();
   const activePlayers = [];
-  for (const item of authResponse.Items) {
-    const lastModified = new Date(item._md);
+  for (const player of players) {
+    const lastModified = new Date(player._md);
 
     if (daysFromDate(lastModified, today) <= maxDays) {
       activePlayers.push(item);
