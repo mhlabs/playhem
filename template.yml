@@ -172,6 +172,29 @@ Resources:
       Action: 'lambda:InvokeFunction'
       Principal: events.amazonaws.com
       SourceArn: !GetAtt InitiateGameRule.Arn
+  GlobalStatisticFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: .
+      Handler: src/statistics/GlobalStatisticFunction.handler
+      MemorySize: 256
+      Timeout: 10
+      Policies: []
+      Environment:
+        Variables:
+  GlobalStatisticRule:
+    Type: 'AWS::Events::Rule'
+    Description: 'Calculates global statistics daily'
+    Properties:
+      ScheduleExpression: rate(1 day)
+      State: ENABLED
+  PermissionForGlobalStatisticEventToInvokeLambda:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref GlobalStatisticFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt GlobalStatisticRule.Arn
   EventBus:
     Type: 'AWS::Events::EventBus'
     Properties:
