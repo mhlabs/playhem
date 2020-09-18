@@ -127,11 +127,9 @@ Resources:
           Id: AuthTargetId
           InputTransformer:
             InputPathsMap:
-              Team: $.detail.team_domain
-              UserId: $.detail.user_id
-              UserName: $.detail.user_name
-              Channel: $.detail.channel_name
-              ResponseUrl: $.detail.response_url
+              IdFromPath: !Match:
+                            - $.detail.path
+                            - /.+\/(.+)/
             InputTemplate: >-
               {"Team": <Team>, "UserId": <UserId>, "UserName": <UserName>,
               "Channel": <Channel> , "ResponseUrl": <ResponseUrl> }
@@ -225,13 +223,13 @@ Resources:
           Id: SubmitTargetId
           InputTransformer:
             InputPathsMap:
-              Player1Name: $.detail.view.state.values.player1.value.selected_option.value
-              Player2Name: $.detail.view.state.values.player2.value.selected_option.value
-              Player1Score: $.detail.view.state.values.score1.value.selected_option.value
-              Player2Score: $.detail.view.state.values.score2.value.selected_option.value
-              #Detail: $.detail
+              Player1Name: $.detail.view.player1.value.selected_option.value
+              Player2Name: $.detail.view.player2.value.selected_option.value
+              Player1Score: $.detail.view.score1.value.selected_option.value
+              Player2Score: $.detail.view.score2.value.selected_option.value
+              Detail: $.detail
             InputTemplate: >-
-              {"Player1": { "Name": <Player1Name>, "Score": <Player1Score> },"Player2": { "Name": <Player2Name>, "Score": <Player2Score> } }
+              {"Player1": { "Name": <Player1Name>, "Score": <Player1Score> },"Player2": { "Name": <Player2Name>, "Score": <Player2Score> }, "Detail": <Detail>}
   PermissionForSubmitGameEventToInvokeLambda:
     Type: "AWS::Lambda::Permission"
     Properties:
