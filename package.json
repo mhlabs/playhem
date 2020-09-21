@@ -10,6 +10,7 @@
     ]
   },
   "dependencies": {
+    "@mhlabs/events-client": "0.0.17",
     "@mhlabs/structured-logging": "^2.0.2",
     "@slack/web-api": "^5.11.0",
     "axios": "^0.20.0",

@@ -5,7 +5,7 @@ const web = new WebClient(token);
 const { Player } = require('../db/entities/Player');
 const { Game } = require('../db/entities/Game');
 exports.handler = async function (event, context) {
-  const players = await Player.query('player', { index: 'ReverseLookupGSI' });
+  const players = await Player.query('PLAYER#', { index: 'ReverseLookupGSI' });
   console.log(players);
 
   const scores = [];

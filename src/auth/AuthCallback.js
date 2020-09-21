@@ -1,8 +1,7 @@
 const { WebClient } = require('@slack/web-api');
 const axios = require('axios');
 const qs = require('querystring');
-const { Auth } = require("../db/entities/Auth");
-const { Player } = require("../db/entities/Player");
+const { Player } = require('../db/entities/Player');
 
 exports.handler = async function (event, context) {
   console.log(event);
@@ -28,16 +27,17 @@ exports.handler = async function (event, context) {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   });
-  
-  await Auth.put( {
+
+  await Player.put({
     Username: userName,
-    ItemType: "auth",
-    Data: response.data,
+    ItemType: 'AUTH',
+    Data: response.data
   });
 
-  await Player.put( {
+  await Player.put({
     Username: userName,
-    ItemType: "player",
+    ItemType: 'PLAYER',
+    Data: { name: userName }
   });
 
   console.log(response.data);
