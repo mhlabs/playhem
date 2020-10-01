@@ -6,6 +6,9 @@ Parameters:
     Type: String
   SlackToken:
     Type: String
+  PingPongSlackChannel:
+    Type: String
+    Default: "playhem-pingpong"
 Description: Stack for Playhem
 Globals:
   Function:
@@ -347,6 +350,38 @@ Resources:
       FunctionName: !Ref AutoApprove
       SourceArn: !Sub >-
         arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPool}
+  SlackPostRecordedPingPongGameRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      EventBusName: playhem
+      EventPattern:
+        source:
+          - playhem
+        detail-type:
+          - GAME#SUMMARY
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt SlackPostPingPongGameInfo.Arn
+          Id: RecordedGamesRuleId
+          InputPath: $.detail.data.new.Data.event
+  SlackPostPingPongGameInfo:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: .
+      Handler: src/slack/PostGameInfo.handler
+      MemorySize: 256
+      Timeout: 5
+      Environment:
+        Variables:
+          SlackToken: !Ref SlackToken
+          SlackChannel: !Ref PingPongSlackChannel
+  PermissionForRecordedGamesRuleEventToInvokeLambda:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref SlackPostPingPongGameInfo
+      Action: 'lambda:InvokeFunction'
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt SlackPostRecordedPingPongGameRule.Arn
 Outputs:
   HttpApiUrl:
     Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/'
