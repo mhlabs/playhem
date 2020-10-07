@@ -28,7 +28,7 @@ async function postMessage(winner, loser) {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*New Match Recorded!*\n"
+                "text": `*New Match Recorded!*\n*Score*: ${winner.Score}-${loser.Score}`
             }
         },
         {
@@ -36,11 +36,7 @@ async function postMessage(winner, loser) {
             "fields": [
                 {
                     "type": "mrkdwn",
-                    "text": `*${winner.Name}* (Winner :sunglasses:)\nScore: ${winner.Score}`
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": `*${loser.Name}* (Loser :imp:)\nScore: ${loser.Score}`
+                    "text": `*Winner :sunglasses:*\n${winner.Name}\n\n*Loser :imp:*\n${loser.Name}`
                 }
             ]
         }
@@ -51,3 +47,14 @@ async function postMessage(winner, loser) {
         blocks: slackBlocks
     })
 }
+
+/*
+Slack block for ranks when we have them
+Not exact reference, but an example
+
+    {
+        "type": "mrkdwn",
+        "text": `*Rank*\n#${winner.Rank}\n\n*Rank*\n#${loser.Rank}`
+    }
+
+*/
