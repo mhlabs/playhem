@@ -38,6 +38,7 @@ exports.handler = async function (event, context) {
       },
       "accessory": {
         "type": "static_select",
+        "action_id": "player1",
         "placeholder": {
           "type": "plain_text",
           "text": "Select player",
@@ -63,6 +64,7 @@ exports.handler = async function (event, context) {
       },
       "accessory": {
         "type": "static_select",
+        "action_id": "score1",
         "placeholder": {
           "type": "plain_text",
           "text": "Select score",
@@ -101,6 +103,7 @@ exports.handler = async function (event, context) {
       },
       "accessory": {
         "type": "static_select",
+        "action_id": "player2",
         "placeholder": {
           "type": "plain_text",
           "text": "Select player",
@@ -126,6 +129,7 @@ exports.handler = async function (event, context) {
       },
       "accessory": {
         "type": "static_select",
+        "action_id": "score2",
         "placeholder": {
           "type": "plain_text",
           "text": "Select score",
