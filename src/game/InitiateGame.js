@@ -31,6 +31,7 @@ exports.handler = async function (event, context) {
     },
     {
       "type": "section",
+      "block_id": "player1",
       "text": {
         "type": "mrkdwn",
         "text": "Player"
@@ -55,6 +56,7 @@ exports.handler = async function (event, context) {
     },
     {
       "type": "section",
+      "block_id": "score1",
       "text": {
         "type": "mrkdwn",
         "text": "Score"
@@ -92,6 +94,7 @@ exports.handler = async function (event, context) {
     },
     {
       "type": "section",
+      "block_id": "player2",
       "text": {
         "type": "mrkdwn",
         "text": "Player"
@@ -116,6 +119,7 @@ exports.handler = async function (event, context) {
     },
     {
       "type": "section",
+      "block_id": "score2",
       "text": {
         "type": "mrkdwn",
         "text": "Score"
