@@ -17,81 +17,133 @@ exports.handler = async function (event, context) {
 
   const blocks = [
     {
-      type: 'input',
-      block_id: `player1`,
-      label: {
-        type: 'plain_text',
-        text: 'Select player 1',
-        emoji: true
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Player 1*  :table_tennis_paddle_and_ball:"
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "block_id": "player1",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Player"
       },
-      element: {
-        action_id: 'value',
-        type: 'static_select',
-        options: players.Items.map((p) => {
+      "accessory": {
+        "type": "static_select",
+        "action_id": "player1",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select player",
+          "emoji": true
+        },
+        "options": players.Items.map((p) => {
           return {
-            text: { type: 'plain_text', text: p.Username },
+            text: {
+              type: 'plain_text',
+              text: p.Username
+            },
             value: p.Username
-          };
+          }
         })
       }
     },
     {
-      type: 'input',
-      block_id: `player2`,
-      label: {
-        type: 'plain_text',
-        text: 'Select player 2',
-        emoji: true
+      "type": "section",
+      "block_id": "score1",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Score"
       },
-      element: {
-        action_id: 'value',
-        type: 'static_select',
-        options: players.Items.map((p) => {
+      "accessory": {
+        "type": "static_select",
+        "action_id": "score1",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select score",
+          "emoji": true
+        },
+        "options": scores.map((p) => {
           return {
-            text: { type: 'plain_text', text: p.Username },
+            text: {
+              type: 'plain_text',
+              text: p
+            },
+            value: p
+          }
+        })
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Player 2*  :table_tennis_paddle_and_ball:"
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "block_id": "player2",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Player"
+      },
+      "accessory": {
+        "type": "static_select",
+        "action_id": "player2",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select player",
+          "emoji": true
+        },
+        "options": players.Items.map((p) => {
+          return {
+            text: {
+              type: 'plain_text',
+              text: p.Username
+            },
             value: p.Username
-          };
+          }
         })
       }
     },
     {
-      type: 'input',
-      block_id: `score1`,
-      label: {
-        type: 'plain_text',
-        text: 'Select player 1 score',
-        emoji: true
+      "type": "section",
+      "block_id": "score2",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Score"
       },
-      element: {
-        action_id: 'value',
-        type: 'static_select',
-        options: scores.map((p) => {
+      "accessory": {
+        "type": "static_select",
+        "action_id": "score2",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select score",
+          "emoji": true
+        },
+        "options": scores.map((p) => {
           return {
-            text: { type: 'plain_text', text: p },
+            text: {
+              type: 'plain_text',
+              text: p
+            },
             value: p
-          };
+          }
         })
-
-      }
-    },
-    {
-      type: 'input',
-      block_id: `score2`,
-      label: {
-        type: 'plain_text',
-        text: 'Select player 2 score',
-        emoji: true
-      },
-      element: {
-        action_id: 'value',
-        type: 'static_select',
-        options: scores.map((p) => {
-          return {
-            text: { type: 'plain_text', text: p },
-            value: p
-          };
-        })
-
       }
     }
   ];
@@ -104,7 +156,7 @@ exports.handler = async function (event, context) {
       blocks: blocks,
       title: {
         type: 'plain_text',
-        text: 'Record your scores'
+        text: 'Record a pingpong game'
       },
       submit: {
         type: 'plain_text',

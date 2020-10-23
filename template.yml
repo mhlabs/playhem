@@ -250,10 +250,10 @@ Resources:
           Id: SubmitTargetId
           InputTransformer:
             InputPathsMap:
-              Player1Name: $.detail.view.state.values.player1.value.selected_option.value
-              Player2Name: $.detail.view.state.values.player2.value.selected_option.value
-              Player1Score: $.detail.view.state.values.score1.value.selected_option.value
-              Player2Score: $.detail.view.state.values.score2.value.selected_option.value
+              Player1Name: $.detail.view.state.values.player1.player1.selected_option.value
+              Player2Name: $.detail.view.state.values.player2.player2.selected_option.value
+              Player1Score: $.detail.view.state.values.score1.score1.selected_option.value
+              Player2Score: $.detail.view.state.values.score2.score2.selected_option.value
             InputTemplate: >-
               {"Player1": { "Name": <Player1Name>, "Score": <Player1Score>
               },"Player2": { "Name": <Player2Name>, "Score": <Player2Score> } }
